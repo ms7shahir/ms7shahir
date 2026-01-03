@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Master - Interactive Coding Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: calc(100vh - 120px);
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-right: 2px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .sidebar h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .lesson-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .lesson-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            border-color: #00ff88;
+        }
+
+        .lesson-item.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .lesson-item.completed {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .lesson-item .lesson-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #00ff88;
+            color: #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .lesson-item.completed .lesson-number {
+            background: #00d4ff;
+        }
+
+        .lesson-item.completed::after {
+            content: " ✓";
+            color: #00ff88;
+            font-weight: bold;
+            float: right;
+            font-size: 1.5em;
+        }
+
+        .main-content {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .lesson-content {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .lesson-content h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .lesson-content h3 {
+            font-size: 1.8em;
+            margin: 30px 0 15px;
+            color: #00d4ff;
+        }
+
+        .lesson-content p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .code-editor {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #00ff88;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-editor::before {
+            content: "Code Editor";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #00ff88;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .code-editor textarea {
+            width: 100%;
+            min-height: 200px;
+            background: #2d2d2d;
+            color: #00ff88;
+            border: none;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            border-radius: 5px;
+            margin-top: 30px;
+            resize: vertical;
+        }
+
+        .code-editor textarea:focus {
+            outline: 2px solid #00d4ff;
+        }
+
+        .code-display {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #00d4ff;
+            position: relative;
+        }
+
+        .code-display::before {
+            content: "Example Code";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #00d4ff;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .code-display pre {
+            margin-top: 30px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            overflow-x: auto;
+        }
+
+        .output-box {
+            background: #000;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #ff0;
+            position: relative;
+            min-height: 100px;
+        }
+
+        .output-box::before {
+            content: "Output";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff0;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .output-content {
+            margin-top: 30px;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            white-space: pre-wrap;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-run {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .btn-run:hover {
+            background: #00d4ff;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-reset {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .btn-reset:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .btn-next:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .tip-box {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 5px solid #00d4ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .tip-box h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .warning-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 5px solid #ff6b6b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .warning-box h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .quiz-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid #00ff88;
+        }
+
+        .quiz-section h3 {
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .quiz-option.correct {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .quiz-option.wrong {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: #ff6b6b;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-box h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .stat-box .stat-value {
+            font-size: 2em;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                max-height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .lesson-content {
+                padding: 20px;
+            }
+
+            .lesson-content h2 {
+                font-size: 1.8em;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💻 Code Master - Interactive Coding Tutorial</h1>
+        <p>Python, JavaScript aur HTML/CSS seekhein - Step by Step</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p style="margin-top: 10px;">Progress: <span id="progressText">0%</span></p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>📚 Lessons</h2>
+            <div id="lessonList"></div>
+        </div>
+
+        <div class="main-content">
+            <div id="lessonContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const lessons = [
+            {
+                id: 1,
+                title: "Introduction to Programming",
+                content: `
+                    <h2>🌟 Programming Kya Hai?</h2>
+                    <p>Programming computer ko instructions dena hai. Jaise aap kisi ko batatey hain ki kya karna hai, waise hi computer ko code ke zariye batate hain.</p>
+                    
+                    <h3>Programming Kyun Seekhein?</h3>
+                    <p>• Apps aur websites bana sakte hain<br>
+                    • Games develop kar sakte hain<br>
+                    • Automation - boring tasks automatically ho jayenge<br>
+                    • High paying jobs milti hain<br>
+                    • Apne ideas ko reality mein la sakte hain</p>
+
+                    <div class="tip-box">
+                        <h4>💡 Pro Tip</h4>
+                        <p>Programming seekhna cycling seekhne jaisa hai - practice se hi perfect hoga!</p>
+                    </div>
+
+                    <h3>Popular Programming Languages</h3>
+                    <p><strong>Python</strong> - Beginners ke liye best, AI/ML ke liye<br>
+                    <strong>JavaScript</strong> - Web development ke liye<br>
+                    <strong>Java</strong> - Android apps ke liye<br>
+                    <strong>C++</strong> - Game development aur system programming</p>
+
+                    <div class="quiz-section">
+                        <h3>🎯 Quick Quiz</h3>
+                        <p><strong>Programming ka main purpose kya hai?</strong></p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">A) Computer ko expensive banana</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">B) Computer ko instructions dena</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">C) Internet use karna</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">D) Games khelna</div>
+                    </div>
+                `,
+                hasCode: false
+            },
+            {
+                id: 2,
+                title: "Python - Variables & Data Types",
+                content: `
+                    <h2>🐍 Python Variables</h2>
+                    <p>Variables ek container hai jisme hum data store karte hain. Jaise ek dabba jisme aap cheezein rakhte hain.</p>
+
+                    <h3>Variable Banana</h3>
+                    <div class="code-display">
+                        <pre>name = "Ali"
+age = 25
+height = 5.8
+is_student = True
+
+print("Name:", name)
+print("Age:", age)
+print("Height:", height)
+print("Is Student:", is_student)</pre>
+                    </div>
+
+                    <div class="tip-box">
+                        <h4>💡 Important Points</h4>
+                        <p>• Variable names mein spaces nahi ho sakte<br>
+                        • Numbers se shuru nahi kar sakte<br>
+                        • Case-sensitive hote hain (Name ≠ name)<br>
+                        • Meaningful names use karein</p>
+                    </div>
+
+                    <h3>Data Types</h3>
+                    <p><strong>String (str)</strong> - Text data: "Hello"<br>
+                    <strong>Integer (int)</strong> - Whole numbers: 25<br>
+                    <strong>Float</strong> - Decimal numbers: 5.8<br>
+                    <strong>Boolean</strong> - True/False</p>
+
+                    <h3>🎮 Practice: Apna Code Likhein</h3>
+                    <p>Neeche apni information ke variables banayein:</p>
+                `,
+                hasCode: true,
+                defaultCode: `# Apna naam, age aur city variable mein store karein
+naam = "Your Name"
+umr = 20
+shehar = "Your City"
+
+# Print karein
+print("Mera naam hai:", naam)
+print("Meri umr hai:", umr)
+print("Main rehta hoon:", shehar)`,
+                solution: `naam = "Ahmed"
+umr = 22
+shehar = "Karachi"
+
+print("Mera naam hai:", naam)
+print("Meri umr hai:", umr)
+print("Main rehta hoon:", shehar)`
+            },
+            {
+                id: 3,
+                title: "Python - Basic Operations",
+                content: `
+                    <h2>🔢 Python Operations</h2>
+                    <p>Programming mein hum calculations aur operations kar sakte hain.</p>
+
+                    <h3>Arithmetic Operations</h3>
+                    <div class="code-display">
+                        <pre>a = 10
+b = 3
+
+print("Addition:", a + b)      # 13
+print("Subtraction:", a - b)   # 7
+print("Multiplication:", a * b) # 30
+print("Division:", a / b)       # 3.333...
+print("Integer Division:", a // b) # 3
+print("Modulus:", a % b)        # 1
+print("Power:", a ** b)         # 1000</pre>
+                    </div>
+
+                    <h3>String Operations</h3>
+                    <div class="code-display">
+                        <pre>first_name = "Ahmed"
+last_name = "Khan"
+
+# Concatenation (jodna)
+full_name = first_name + " " + last_name
+print(full_name)  # Ahmed Khan
+
+# Repetition
+print("Ha" * 3)  # HaHaHa
+
+# Length
+print(len(full_name))  # 10</pre>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ Common Mistake</h4>
+                        <p>String aur number ko directly add nahi kar sakte:<br>
+                        ❌ "Age: " + 25<br>
+                        ✅ "Age: " + str(25)</p>
+                    </div>
+
+                    <h3>🎮 Practice Time</h3>
+                    <p>Ek simple calculator banayein:</p>
+                `,
+                hasCode: true,
+                defaultCode: `# Calculator banayein
+num1 = 15
+num2 = 4
+
+# Calculations karein aur print karein
+addition = num1 + num2
+subtraction = num1 - num2
+multiplication = num1 * num2
+division = num1 / num2
+
+print("Addition:", addition)
+print("Subtraction:", subtraction)
+print("Multiplication:", multiplication)
+print("Division:", division)`,
+                solution: `num1 = 15
+num2 = 4
+
+addition = num1 + num2
+subtraction = num1 - num2
+multiplication = num1 * num2
+division = num1 / num2
+
+print("Addition:", addition)
+print("Subtraction:", subtraction)
+print("Multiplication:", multiplication)
+print("Division:", division)`
+            },
+            {
+                id: 4,
+                title: "Python - If-Else Conditions",
+                content: `
+                    <h2>🔀 Conditional Statements</h2>
+                    <p>Conditions ki madad se hum decisions le sakte hain - agar yeh hai to yeh karo, warna woh karo.</p>
+
+                    <h3>Basic If Statement</h3>
+                    <div class="code-display">
+                        <pre>age = 18
+
+if age >= 18:
+    print("Aap adult hain")
+    print("Vote kar sakte hain")
+else:
+    print("Aap abhi bachche hain")
+    print("Vote nahi kar sakte")</pre>
+                    </div>
+
+                    <div class="tip-box">
+                        <h4>💡 Indentation Important Hai!</h4>
+                        <p>Python mein spaces (indentation) bahut important hain. If ke andar ka code 4 spaces ya 1 tab se indent hona chahiye.</p>
+                    </div>
+
+                    <h3>Multiple Conditions (elif)</h3>
+                    <div class="code-display">
+                        <pre>marks = 85
+
+if marks >= 90:
+    print("Grade: A+")
+elif marks >= 80:
+    print("Grade: A")
+elif marks >= 70:
+    print("Grade: B")
+elif marks >= 60:
+    print("Grade: C")
+else:
+    print("Grade: F")</pre>
+                    </div>
+
+                    <h3>Comparison Operators</h3>
+                    <p>== (equal to), != (not equal), > (greater), < (less), >= , <=</p>
+
+                    <h3>🎮 Challenge</h3>
+                    <p>Ek program banayein jo temperature check kare:</p>
+                `,
+                hasCode: true,
+                defaultCode: `# Temperature checker
+temperature = 35
+
+# Conditions likhein:
+# 40+ = "Bahut garmi hai"
+# 30-40 = "Garmi hai"
+# 20-30 = "Mausam achcha hai"
+# 20 se kam = "Thandi hai"
+
+if temperature > 40:
+    print("Bahut garmi hai! AC chala lo")
+elif temperature >= 30:
+    print("Garmi hai")
+elif temperature >= 20:
+    print("Mausam achcha hai")
+else:
+    print("Thandi hai! Jacket pehan lo")`
+            },
+            {
+                id: 5,
+                title: "Python - Loops (For & While)",
+                content: `
+                    <h2>🔁 Loops - Repetition</h2>
+                    <p>Loops ki madad se hum ek kaam baar-baar kar sakte hain bina code repeat kiye.</p>
+
+                    <h3>For Loop</h3>
+                    <div class="code-display">
+                        <pre># 1 se 5 tak print karein
+for i in range(1, 6):
+    print(i)
+
+# Output: 1, 2, 3, 4, 5
+
+# List ke through loop
+fruits = ["Apple", "Banana", "Orange"]
+for fruit in fruits:
+    print("I like", fruit)</pre>
+                    </div>
+
+                    <h3>While Loop</h3>
+                    <div class="code-display">
+                        <pre>count = 1
+while count <= 5:
+    print("Count is:", count)
+    count = count + 1  # ya count += 1
+
+print("Loop khatam!")</pre>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ Infinite Loop se Bachein!</h4>
+                        <p>While loop mein condition kabhi false honi chahiye, warna loop kabhi nahi rukegi.<br>
+                        Counter ko increment karna na bhulein!</p>
+                    </div>
+
+                    <h3>Break & Continue</h3>
+                    <div class="code-display">
+                        <pre># Break - loop ko rok deta hai
+for i in range(1, 11):
+    if i == 5:
+        break
+    print(i)  # Output: 1, 2, 3, 4
+
+# Continue - current iteration skip karta hai
+for i in range(1, 6):
+    if i == 3:
+        continue
+    print(i)  # Output: 1, 2, 4, 5</pre>
+                    </div>
+
+                    <h3>🎮 Practice: Table Generator</h3>
+                    <p>Kisi bhi number ka table print karein:</p>
+                `,
+                hasCode: true,
+                defaultCode: `# Table Generator
+number = 5
+
+# For loop use karke table print karein
+# Example: 5 x 1 = 5, 5 x 2 = 10, etc.
+
+for i in range(1, 11):
+    result = number * i
+    print(f"{number} x {i} = {result}")`,
+                solution: `number = 7
+
+for i in range(1, 11):
+    result = number * i
+    print(f"{number} x {i} = {result}")`
+            },
+            {
+                id: 6,
+                title: "JavaScript - Getting Started",
+                content: `
+                    <h2>🌐 JavaScript Introduction</h2>
+                    <p>JavaScript web pages ko interactive banata hai. Yeh browser mein run hota hai aur web development ke liye essential hai.</p>
+
+                    <h3>Console mein Output</h3>
+                    <div class="code-display">
+                        <pre>// Single line comment
+console.log("Hello, World!");
+
+/* Multi-line
+   comment */
+
+// Variables
+let name = "Ahmed";
+const age = 25;
+var city = "Lahore";  // old way
+
+console.log(name, age, city);</pre>
+                    </div>
+
+                    <div class="tip-box">
+                        <h4>💡 let vs const vs var</h4>
+                        <p><strong>let</strong> - value change ho sakti hai<br>
+                        <strong>const</strong> - value fixed hai<br>
+                        <strong>var</strong> - purana tareeqa (use mat karein)</p>
+                    </div>
+
+                    <h3>Data Types</h3>
+                    <div class="code-display">
+                        <pre>// String
+let message = "Hello";
+let name = 'Ahmed';
+
+// Number
+let age = 25;
+let price = 99.99;
+
+// Boolean
+let isActive = true;
+let hasPermission = false;
+
+// Array
+let fruits = ["Apple", "Banana", "Orange"];
+console.log(fruits[0]);  // Apple
+
+// Object
+let person = {
+    name: "Ahmed",
+    age: 25,
+    city: "Karachi"
+};
+console.log(person.name);  // Ahmed</pre>
+                    </div>
+
+                    <h3>🎮 Try JavaScript</h3>
+                    <p>Note: Yeh simulator hai, actual JavaScript console nahi hai:</p>
+                `,
+                hasCode: true,
+                defaultCode: `// JavaScript variables aur data types
+let myName = "Your Name";
+let myAge = 20;
+let hobbies = ["Reading", "Gaming", "Coding"];
+
+console.log("Name:", myName);
+console.log("Age:", myAge);
+console.log("Hobbies:", hobbies);
+
+// Object banayein
+let student = {
+    name: myName,
+    age: myAge,
+    grade: "A"
+};
+
+console.log("Student Info:", student);`,
+                solution: `let myName = "Ahmed";
+let myAge = 22;
+let hobbies = ["Cricket", "Programming", "Music"];
+
+console.log("Name:", myName);
+console.log("Age:", myAge);
+console.log("Hobbies:", hobbies);
+
+let student = {
+    name: myName,
+    age: myAge,
+    grade: "A"
+};
+
+console.log("Student Info:", student);`
+            },
+            {
+                id: 7,
+                title: "HTML - Structure of Web",
+                content: `
+                    <h2>🌍 HTML Basics</h2>
+                    <p>HTML (HyperText Markup Language) web pages ka skeleton hai. Yeh structure provide karta hai.</p>
+
+                    <h3>Basic HTML Structure</h3>
+                    <div class="code-display">
+                        <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My First Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Welcome to My Website&lt;/h1&gt;
+    &lt;p&gt;Yeh mera pehla web page hai!&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+
+                    <h3
