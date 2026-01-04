@@ -6,5 +6,5 @@ Hi there 👋 I'm [Your Name Shahir]
 - 🌱 I'm currently learning AI/ML, Web Development
 - 👯 I'm looking to collaborate on Open Source Projects
 - 💬 Ask me about Python, JavaScript, Web Dev
-- 📫 How to reach me: your.email@example.com
+- 📫 How to reach me: your ms7singar@gmail.com
 - ⚡ Fun fact: I love coding and gaming!
